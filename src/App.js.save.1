@@ -16,20 +16,6 @@ import {
   Legend,
 } from "recharts";
 
-
-import {
-  ComposableMap,
-  Geographies,
-  Geography,
-  Marker
-} from "react-simple-maps";
-
-const geoUrl =
-"https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
-
-
-
-
 function App() {
   const [data, setData] = useState(null);
   const [search, setSearch] = useState("");
@@ -189,10 +175,7 @@ function App() {
         </button>
 
         <button onClick={exportCSV} style={styles.exportBtn}>
-  
-
-
-        📄 Export CSV
+          📄 Export CSV
         </button>
 
         <label style={styles.uploadBtn}>
@@ -211,61 +194,8 @@ function App() {
         <Stat title="Top IPs" value={attackerData.length} color="#F43F5E" />
       </div>
 
-
-
-
-
-
-
-
-      
-
-
-
-
-
       {/* Charts */}
       <div style={styles.grid}>
-<div className="card" style={{ gridColumn: "1 / -1" }}>
-  <h3>🌍 Global Threat Map</h3>
-  <div style={{ height: "820px", width: "100%", overflow: "hidden", borderRadius: "14px", marginTop: "10px" }}>
-    <ComposableMap projectionConfig={{ scale: 135 }} style={{ width: "100%", height: "100%" }}>
-      <Geographies geography={geoUrl}>
-        {({ geographies }) =>
-          geographies.map((geo) => (
-            <Geography
-              key={geo.rsmKey}
-              geography={geo}
-              fill="#1f3470"
-              stroke="#3b4f80"
-              style={{
-                default: { outline: "none" },
-                hover: { fill: "#2a4a9c", outline: "none" },
-                pressed: { outline: "none" }
-              }}
-            />
-          ))
-        }
-      </Geographies>
-
-      <Marker coordinates={[-95, 37]}>
-        <circle r={7} fill="#ff4d6d" stroke="#fff" strokeWidth={2} />
-      </Marker>
-      <Marker coordinates={[78, 22]}>
-        <circle r={7} fill="#00d4ff" stroke="#fff" strokeWidth={2} />
-      </Marker>
-      <Marker coordinates={[10, 51]}>
-        <circle r={7} fill="#22c55e" stroke="#fff" strokeWidth={2} />
-      </Marker>
-    </ComposableMap>
-  </div>
-</div>
-
-
-
-
-
-
         <Card title="🌍 Top Countries">
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={countryData}>
@@ -290,6 +220,65 @@ function App() {
               >
                 {typeData.map((_, i) => (
                   <Cell key={i} fill={pieColors[i % pieColors.length]} />
+ >
+          <option value="all">All Severity</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+          <option value="none">None</option>
+        </select>
+
+        <button onClick={loadDemo} style={styles.demoBtn}>
+          ⚡ Load Demo
+        </button>
+
+        <button onClick={exportCSV} style={styles.exportBtn}>
+          📄 Export CSV
+        </button>
+
+        <label style={styles.uploadBtn}>
+          📂 Upload Log
+          <input type="file" hidden onChange={handleUpload} />
+        </label>
+      </div>
+
+      {loading && <p style={{ color: "#06B6D4" }}>Loading...</p>}
+
+      {/* Stats */}
+      <div style={styles.stats}>
+        <Stat title="Logs" value={filteredLogs.length} color="#06B6D4" />
+        <Stat title="Countries" value={countryData.length} color="#10B981" />
+        <Stat title="Attacks" value={data?.total_attacks || 0} color="#F59E0B" />
+        <Stat title="Top IPs" value={attackerData.length} color="#F43F5E" />
+      </div>
+
+      {/* Charts */}
+      <div style={styles.grid}>
+        <Card title="🌍 Top Countries">
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={countryData}>
+              <CartesianGrid stroke="#1e293b" />
+              <XAxis dataKey="country" stroke="#cbd5e1" />
+              <YAxis stroke="#cbd5e1" />
+              <Tooltip />
+              <Bar dataKey="count" fill="#10B981" radius={[10,10,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+
+        <Card title="🥧 Attack Types">
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={typeData}
+                dataKey="value"
+                innerRadius={55}
+                outerRadius={100}
+                paddingAngle={4}
+              >
+                {typeData.map((_, i) => (
+                  <Cell key={i} fill={pieColors[i % pieColors.length]} />
+                ))}
                 ))}
               </Pie>
               <Tooltip />

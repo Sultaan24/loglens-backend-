@@ -13,10 +13,8 @@ import {
   Cell,
   AreaChart,
   Area,
-  Legend,
+  Legend
 } from "recharts";
-
-
 import {
   ComposableMap,
   Geographies,
@@ -26,9 +24,6 @@ import {
 
 const geoUrl =
 "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
-
-
-
 
 function App() {
   const [data, setData] = useState(null);
@@ -93,23 +88,30 @@ function App() {
 
   const countryData = Object.entries(countryMap).map(([country, count]) => ({
     country,
-    count,
+    count
   }));
 
   const typeData = Object.entries(typeMap).map(([name, value]) => ({
     name,
-    value,
+    value
   }));
 
   const lineData = Object.entries(timeMap).map(([time, count]) => ({
     time,
-    count,
+    count
   }));
 
   const attackerData = Object.entries(attackerMap).map(([ip, count]) => ({
     ip,
-    count,
+    count
   }));
+
+  const markers = [
+    { name: "India", coordinates: [78.9629, 20.5937] },
+    { name: "United States", coordinates: [-95.7129, 37.0902] },
+    { name: "Germany", coordinates: [10.4515, 51.1657] },
+    { name: "Localhost", coordinates: [0, 0] }
+  ];
 
   const pieColors = [
     "#06B6D4",
@@ -117,7 +119,7 @@ function App() {
     "#F43F5E",
     "#10B981",
     "#F59E0B",
-    "#3B82F6",
+    "#3B82F6"
   ];
 
   const exportCSV = () => {
@@ -128,7 +130,7 @@ function App() {
       "Severity",
       "Method",
       "Status",
-      "Path",
+      "Path"
     ];
 
     const rows = filteredLogs.map((l) => [
@@ -138,7 +140,7 @@ function App() {
       l.severity,
       l.method,
       l.status,
-      l.path,
+      l.path
     ]);
 
     const csv = [headers, ...rows]
@@ -163,7 +165,6 @@ function App() {
         </div>
       </div>
 
-      {/* Controls */}
       <div style={styles.controls}>
         <input
           placeholder="🔍 Search IP / attack / path"
@@ -189,10 +190,7 @@ function App() {
         </button>
 
         <button onClick={exportCSV} style={styles.exportBtn}>
-  
-
-
-        📄 Export CSV
+          📄 Export CSV
         </button>
 
         <label style={styles.uploadBtn}>
@@ -203,7 +201,6 @@ function App() {
 
       {loading && <p style={{ color: "#06B6D4" }}>Loading...</p>}
 
-      {/* Stats */}
       <div style={styles.stats}>
         <Stat title="Logs" value={filteredLogs.length} color="#06B6D4" />
         <Stat title="Countries" value={countryData.length} color="#10B981" />
@@ -211,61 +208,43 @@ function App() {
         <Stat title="Top IPs" value={attackerData.length} color="#F43F5E" />
       </div>
 
+      {/* MAP */}
+      <Card title="🌍 Global Threat Map">
+        <ComposableMap projectionConfig={{ scale: 145 }}>
+          <Geographies geography={geoUrl}>
+            {({ geographies }) =>
+              geographies.map((geo) => (
+                <Geography
+                  key={geo.rsmKey}
+                  geography={geo}
+                  fill="#172554"
+                  stroke="#334155"
+                  style={{
+                    default: { outline: "none" },
+                    hover: { fill: "#1d4ed8", outline: "none" },
+                    pressed: { outline: "none" }
+                  }}
+                />
+              ))
+            }
+          </Geographies>
 
+          {markers.map((m, i) => (
+            <Marker key={i} coordinates={m.coordinates}>
+              <circle r={6} fill="#06B6D4" stroke="#fff" strokeWidth={1.5} />
+              <text
+                textAnchor="middle"
+                y={-12}
+                style={{ fill: "#fff", fontSize: "10px" }}
+              >
+                {m.name}
+              </text>
+            </Marker>
+          ))}
+        </ComposableMap>
+      </Card>
 
-
-
-
-
-
-      
-
-
-
-
-
-      {/* Charts */}
       <div style={styles.grid}>
-<div className="card" style={{ gridColumn: "1 / -1" }}>
-  <h3>🌍 Global Threat Map</h3>
-  <div style={{ height: "820px", width: "100%", overflow: "hidden", borderRadius: "14px", marginTop: "10px" }}>
-    <ComposableMap projectionConfig={{ scale: 135 }} style={{ width: "100%", height: "100%" }}>
-      <Geographies geography={geoUrl}>
-        {({ geographies }) =>
-          geographies.map((geo) => (
-            <Geography
-              key={geo.rsmKey}
-              geography={geo}
-              fill="#1f3470"
-              stroke="#3b4f80"
-              style={{
-                default: { outline: "none" },
-                hover: { fill: "#2a4a9c", outline: "none" },
-                pressed: { outline: "none" }
-              }}
-            />
-          ))
-        }
-      </Geographies>
-
-      <Marker coordinates={[-95, 37]}>
-        <circle r={7} fill="#ff4d6d" stroke="#fff" strokeWidth={2} />
-      </Marker>
-      <Marker coordinates={[78, 22]}>
-        <circle r={7} fill="#00d4ff" stroke="#fff" strokeWidth={2} />
-      </Marker>
-      <Marker coordinates={[10, 51]}>
-        <circle r={7} fill="#22c55e" stroke="#fff" strokeWidth={2} />
-      </Marker>
-    </ComposableMap>
-  </div>
-</div>
-
-
-
-
-
-
         <Card title="🌍 Top Countries">
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={countryData}>
@@ -273,7 +252,7 @@ function App() {
               <XAxis dataKey="country" stroke="#cbd5e1" />
               <YAxis stroke="#cbd5e1" />
               <Tooltip />
-              <Bar dataKey="count" fill="#10B981" radius={[10,10,0,0]} />
+              <Bar dataKey="count" fill="#10B981" radius={[10, 10, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -281,13 +260,7 @@ function App() {
         <Card title="🥧 Attack Types">
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie
-                data={typeData}
-                dataKey="value"
-                innerRadius={55}
-                outerRadius={100}
-                paddingAngle={4}
-              >
+              <Pie data={typeData} dataKey="value" innerRadius={55} outerRadius={100}>
                 {typeData.map((_, i) => (
                   <Cell key={i} fill={pieColors[i % pieColors.length]} />
                 ))}
@@ -303,22 +276,11 @@ function App() {
         <Card title="📈 Threat Timeline">
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={lineData}>
-              <defs>
-                <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.8} />
-                  <stop offset="95%" stopColor="#06B6D4" stopOpacity={0} />
-                </linearGradient>
-              </defs>
               <CartesianGrid stroke="#1e293b" />
               <XAxis dataKey="time" stroke="#cbd5e1" />
               <YAxis stroke="#cbd5e1" />
               <Tooltip />
-              <Area
-                dataKey="count"
-                stroke="#06B6D4"
-                fill="url(#grad1)"
-                strokeWidth={3}
-              />
+              <Area dataKey="count" stroke="#06B6D4" fill="#06B6D455" />
             </AreaChart>
           </ResponsiveContainer>
         </Card>
@@ -330,43 +292,11 @@ function App() {
               <XAxis dataKey="ip" stroke="#cbd5e1" />
               <YAxis stroke="#cbd5e1" />
               <Tooltip />
-              <Bar dataKey="count" fill="#F43F5E" radius={[10,10,0,0]} />
+              <Bar dataKey="count" fill="#F43F5E" radius={[10, 10, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
       </div>
-
-      {/* Table */}
-      <Card title="📋 Attack Logs">
-        <div style={{ overflowX: "auto" }}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th>IP</th>
-                <th>Country</th>
-                <th>Attack</th>
-                <th>Severity</th>
-                <th>Method</th>
-                <th>Status</th>
-                <th>Path</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLogs.map((l, i) => (
-                <tr key={i}>
-                  <td>{l.ip}</td>
-                  <td>{l.country}</td>
-                  <td>{l.attack}</td>
-                  <td>{l.severity}</td>
-                  <td>{l.method}</td>
-                  <td>{l.status}</td>
-                  <td>{l.path}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
     </div>
   );
 }
@@ -405,140 +335,78 @@ const styles = {
     padding: 24,
     color: "white",
     fontFamily: "Arial, sans-serif",
-    background:
-      "radial-gradient(circle at top left,#0f172a,#020617,#000000)",
-    position: "relative",
-    overflow: "hidden",
+    background: "radial-gradient(circle at top left,#0f172a,#020617,#000000)"
   },
-
   header: { marginBottom: 20 },
-
   title: { fontSize: 42, fontWeight: 800, margin: 0 },
-
   sub: { color: "#94a3b8", marginTop: 6 },
-
   controls: {
     display: "grid",
     gridTemplateColumns: "2fr 1fr auto auto auto",
     gap: 12,
-    marginBottom: 20,
+    marginBottom: 20
   },
-
   input: {
     padding: 14,
     borderRadius: 14,
-    border: "1px solid rgba(255,255,255,0.08)",
-    background: "rgba(255,255,255,0.05)",
+    background: "#111827",
     color: "white",
-    outline: "none",
+    border: "1px solid #334155"
   },
-
   demoBtn: {
     padding: "14px 16px",
-    border: "none",
     borderRadius: 14,
-    cursor: "pointer",
-    fontWeight: 700,
-    background: "linear-gradient(135deg,#8B5CF6,#06B6D4)",
-    color: "white",
+    border: "none",
+    background: "#8B5CF6",
+    color: "white"
   },
-
   exportBtn: {
     padding: "14px 16px",
-    border: "none",
     borderRadius: 14,
-    cursor: "pointer",
-    fontWeight: 700,
-    background: "linear-gradient(135deg,#06B6D4,#3B82F6)",
-    color: "white",
+    border: "none",
+    background: "#06B6D4",
+    color: "white"
   },
-
   uploadBtn: {
     padding: "14px 16px",
     borderRadius: 14,
-    cursor: "pointer",
-    fontWeight: 700,
-    background: "linear-gradient(135deg,#10B981,#059669)",
+    background: "#10B981",
     color: "white",
     textAlign: "center",
+    cursor: "pointer"
   },
-
   stats: {
     display: "grid",
     gridTemplateColumns: "repeat(4,1fr)",
     gap: 16,
-    marginBottom: 20,
+    marginBottom: 20
   },
-
   statCard: {
-    background: "rgba(255,255,255,0.05)",
+    background: "#111827",
     padding: 18,
-    borderRadius: 18,
-    backdropFilter: "blur(12px)",
+    borderRadius: 18
   },
-
-  statTitle: { color: "#94a3b8", fontSize: 14 },
-
+  statTitle: { color: "#94a3b8" },
   statValue: { fontSize: 34, fontWeight: 800, marginTop: 8 },
-
   grid: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: 20,
-    marginBottom: 20,
+    marginTop: 20
   },
-
   card: {
-    background: "rgba(255,255,255,0.05)",
+    background: "#111827",
     borderRadius: 22,
     padding: 20,
-    backdropFilter: "blur(12px)",
+    marginBottom: 20
   },
-
   cardTitle: {
     marginBottom: 14,
     fontSize: 24,
-    fontWeight: 700,
-  },
-
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    color: "white",
-  },
-
-  glow1: {
-    position: "absolute",
-    width: 260,
-    height: 260,
-    borderRadius: "50%",
-    background: "#06B6D422",
-    top: -80,
-    left: -80,
-    filter: "blur(90px)",
-  },
-
-  glow2: {
-    position: "absolute",
-    width: 280,
-    height: 280,
-    borderRadius: "50%",
-    background: "#8B5CF622",
-    right: 100,
-    top: 180,
-    filter: "blur(90px)",
-  },
-
-  glow3: {
-    position: "absolute",
-    width: 280,
-    height: 280,
-    borderRadius: "50%",
-    background: "#10B98122",
-    bottom: 50,
-    left: 250,
-    filter: "blur(90px)",
-  },
+    fontWeight: 700
+  }
 };
 
 export default App;
+
+
