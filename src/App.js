@@ -44,14 +44,14 @@ function App() {
     form.append("file", file);
 
     setLoading(true);
-    const res = await axios.post("http://127.0.0.1:5000/upload", form);
+    const res = await axios.post("https://loglens-api-57cj.onrender.com/upload", form);
     setData(res.data);
     setLoading(false);
   };
 
   const loadDemo = async () => {
     setLoading(true);
-    const res = await axios.get("http://127.0.0.1:5000/demo");
+    const res = await axios.get("https://loglens-api-57cj.onrender.com/demo");
     setData(res.data);
     setLoading(false);
   };
