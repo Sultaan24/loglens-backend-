@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import {
   ResponsiveContainer,
@@ -58,21 +58,20 @@ function App() {
 
   const logs = data?.logs || [];
 
-  const filteredLogs = useMemo(() => {
-    return logs.filter((log) => {
-      const q = search.toLowerCase();
+const filteredLogs = logs.filter((log) => {
+  const q = search.toLowerCase();
 
-      const matchSearch =
-        log.ip.toLowerCase().includes(q) ||
-        log.attack.toLowerCase().includes(q) ||
-        log.path.toLowerCase().includes(q);
+  const matchSearch =
+    log.ip.toLowerCase().includes(q) ||
+    log.attack.toLowerCase().includes(q) ||
+    log.path.toLowerCase().includes(q);
 
-      const matchSeverity =
-        severity === "all" ? true : log.severity === severity;
+  const matchSeverity =
+    severity === "all" ? true : log.severity === severity;
 
-      return matchSearch && matchSeverity;
-    });
-  }, [logs, search, severity]);
+  return matchSearch && matchSeverity;
+});
+  
 
   const countryMap = {};
   const typeMap = {};
