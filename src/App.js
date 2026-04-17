@@ -41,8 +41,6 @@ function App() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const [jobId, setJobId] = useState(null);
-  const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("");
 
 
