@@ -66,9 +66,11 @@ const handleUpload = async (e) => {
   setStatusText("Uploading...");
 
 const res = await axios.post(
-"https://loglens-api-57cj.onrender.com/upload"
+  "https://loglens-api-57cj.onrender.com/upload",
   form
 );
+
+
   setData(res.data);
   setLoading(false);
 
