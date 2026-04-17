@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import {
   ResponsiveContainer,
   BarChart,
@@ -45,16 +43,6 @@ function App() {
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("");
 
-
-useEffect(() => {
-  const savedLogin = localStorage.getItem("loglens_login");
-  if (savedLogin === "true") {
-    setLoggedIn(true);
-localStorage.setItem("loglens_login", "true");
-  }
-}, []);
-
-
 const handleUpload = async (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -63,16 +51,42 @@ const handleUpload = async (e) => {
   form.append("file", file);
 
   setLoading(true);
+  setProgress(0);
   setStatusText("Uploading...");
 
-const res = await axios.post(
-"https://loglens-api-57cj.onrender.com/upload"
-  form
-);
-  setData(res.data);
-  setLoading(false);
+  const res = await axios.post(
+    "https://loglens-api-57cj.onrender.com/upload_async",
+    form
+  );
 
+  const id = res.data.job_id;
+  setJobId(id);
+
+  const interval = setInterval(async () => {
+    const statusRes = await axios.get(
+      `https://loglens-api-57cj.onrender.com/status/${id}`
+    );
+
+    const job = statusRes.data;
+
+    setProgress(job.progress || 0);
+    setStatusText(job.status);
+
+    if (job.status === "completed") {
+      clearInterval(interval);
+      setData(job.result);
+      setLoading(false);
+    }
+
+    if (job.status === "failed") {
+      clearInterval(interval);
+      setLoading(false);
+      setStatusText("Failed");
+    }
+  }, 1500);
 };
+
+
 
 
 
@@ -148,96 +162,46 @@ const filteredLogs = logs.filter((log) => {
     "#3B82F6",
   ];
 
-const exportCSV = () => {
-  const headers = [
-    "IP",
-    "Country",
-    "Attack",
-    "Severity",
-    "Method",
-    "Status",
-    "Path",
-  ];
+  const exportCSV = () => {
+    const headers = [
+      "IP",
+      "Country",
+      "Attack",
+      "Severity",
+      "Method",
+      "Status",
+      "Path",
+    ];
 
-  const rows = filteredLogs.map((l) => [
-    l.ip,
-    l.country,
-    l.attack,
-    l.severity,
-    l.method,
-    l.status,
-    l.path,
-  ]);
-
-  const csv = [headers, ...rows]
-    .map((row) => row.map((x) => `"${x}"`).join(","))
-    .join("\n");
-
-  const blob = new Blob([csv], {
-    type: "text/csv;charset=utf-8;",
-  });
-
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "loglens-report.csv";
-  link.click();
-};
-
-const exportPDF = () => {
-  const doc = new jsPDF();
-
-  doc.setFontSize(18);
-  doc.text("LogLens Security Report", 14, 20);
-
-  doc.setFontSize(11);
-  doc.text(`Total Logs: ${data?.total_logs || 0}`, 14, 32);
-  doc.text(`Total Attacks: ${data?.total_attacks || 0}`, 14, 40);
-  doc.text(`Lines Processed: ${data?.total_lines || 0}`, 14, 48);
-  doc.text(`Skipped Lines: ${data?.skipped_lines || 0}`, 14, 56);
-  doc.text(`Processing Time: ${data?.processing_time || 0}s`, 14, 64);
-
-  autoTable(doc, {
-    startY: 75,
-    head: [["IP", "Country", "Attack", "Severity"]],
-    body: filteredLogs.slice(0, 15).map((l) => [
+    const rows = filteredLogs.map((l) => [
       l.ip,
       l.country,
       l.attack,
       l.severity,
-    ]),
-  });
+      l.method,
+      l.status,
+      l.path,
+    ]);
 
-  doc.save("loglens-report.pdf");
-};
+    const csv = [headers, ...rows]
+      .map((row) => row.map((x) => `"${x}"`).join(","))
+      .join("\n");
 
-
-
-
-
-
-
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "loglens-report.csv";
+    link.click();
+  };
 if (!loggedIn) {
-const handleLogin = async () => {
-  try {
-    const res = await axios.post("https://loglens-api-57cj.onrender.com/login", {
-      username,
-      password,
-    });
-
-    if (res.data.success) {
+  const handleLogin = () => {
+    if (username === "admin" && password === "1234") {
       setLoggedIn(true);
-      localStorage.setItem("loglens_login", "true");
       setError("");
+    } else {
+      setError("Invalid username or password");
     }
-  } catch (err) {
-    setError("Invalid username or password");
-  }
-};
-
-
-
-
-
+  };
 
   return (
     <div style={styles.loginPage}>
@@ -298,7 +262,9 @@ const handleLogin = async () => {
     </div>
   );
 }      
-    return (
+
+
+  return (
     <div style={styles.page}>
       <Glow />
 
@@ -309,10 +275,7 @@ const handleLogin = async () => {
   </div>
 
   <button
-onClick={() => {
-  setLoggedIn(false);
-  localStorage.removeItem("loglens_login");
-}}
+    onClick={() => setLoggedIn(false)}
     style={styles.exportBtn}
   >
     Logout
@@ -355,61 +318,20 @@ onClick={() => {
         📄 Export CSV
         </button>
 
-<button onClick={exportPDF} style={styles.exportBtn}>
-  📕 Export PDF
-</button>
-
-
-
-
-
-
-
         <label style={styles.uploadBtn}>
           📂 Upload Log
           <input type="file" hidden onChange={handleUpload} />
         </label>
       </div>
 
-      {loading && (
-  <div style={{ marginBottom: 20 }}>
-    <p style={{ color: "#06B6D4", marginBottom: 8 }}>
-      {statusText} ({progress}%)
-    </p>
-
-    <div
-      style={{
-        width: "100%",
-        height: "12px",
-        background: "rgba(255,255,255,0.08)",
-        borderRadius: "10px",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          width: `${progress}%`,
-          height: "100%",
-          background: "linear-gradient(90deg,#8B5CF6,#06B6D4)",
-          transition: "0.4s",
-        }}
-      />
-    </div>
-  </div>
-)}
+      {loading && <p style={{ color: "#06B6D4" }}>Loading...</p>}
 
       {/* Stats */}
       <div style={styles.stats}>
-<div style={styles.stats}>
-  <Stat title="Logs" value={data?.total_logs || logs.length} color="#06B6D4" />
-  <Stat title="Countries" value={countryData.length} color="#10B981" />
-  <Stat title="Attacks" value={data?.total_attacks || attackerData.length} color="#F59E0B" />
-  <Stat title="Top IPs" value={attackerData.length} color="#F43F5E" />
-  <Stat title="Lines" value={data?.total_lines || 0} color="#3B82F6" />
-  <Stat title="Skipped" value={data?.skipped_lines || 0} color="#FF4D4D" />
-  <Stat title="Time(s)" value={data?.processing_time || 0} color="#8B5CF6" />
-</div>
-
+        <Stat title="Logs" value={filteredLogs.length} color="#06B6D4" />
+        <Stat title="Countries" value={countryData.length} color="#10B981" />
+        <Stat title="Attacks" value={data?.total_attacks || 0} color="#F59E0B" />
+        <Stat title="Top IPs" value={attackerData.length} color="#F43F5E" />
       </div>
 
 
@@ -420,7 +342,6 @@ onClick={() => {
 
 
       
-
 
 
 
@@ -664,19 +585,12 @@ header: {
 
   sub: { color: "#94a3b8", marginTop: 6 },
 
-controls: {
-  display: "grid",
-  gridTemplateColumns: "2fr 1fr auto auto auto auto",
-  gap: 12,
-  marginBottom: 20,
-  alignItems: "center",
-},
-
-
-
-
-
-
+  controls: {
+    display: "grid",
+    gridTemplateColumns: "2fr 1fr auto auto auto",
+    gap: 12,
+    marginBottom: 20,
+  },
 
   input: {
     padding: 14,
@@ -719,8 +633,8 @@ controls: {
 
   stats: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: 14,
+    gridTemplateColumns: "repeat(4,1fr)",
+    gap: 16,
     marginBottom: 20,
   },
 
@@ -735,12 +649,12 @@ controls: {
 
   statValue: { fontSize: 34, fontWeight: 800, marginTop: 8 },
 
-grid: {
-  display: "grid",
- gridTemplateColumns: "1fr 1fr",
-  gap: 20,
-  marginBottom: 20,
-},
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 20,
+    marginBottom: 20,
+  },
 
   card: {
     background: "rgba(255,255,255,0.05)",
@@ -796,7 +710,6 @@ grid: {
 };
 
 export default App;
-
 
 
 

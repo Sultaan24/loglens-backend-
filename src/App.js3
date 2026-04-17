@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -46,14 +46,6 @@ function App() {
   const [statusText, setStatusText] = useState("");
 
 
-useEffect(() => {
-  const savedLogin = localStorage.getItem("loglens_login");
-  if (savedLogin === "true") {
-    setLoggedIn(true);
-localStorage.setItem("loglens_login", "true");
-  }
-}, []);
-
 
 const handleUpload = async (e) => {
   const file = e.target.files[0];
@@ -66,7 +58,7 @@ const handleUpload = async (e) => {
   setStatusText("Uploading...");
 
 const res = await axios.post(
-"https://loglens-api-57cj.onrender.com/upload"
+  "http://127.0.0.1:5000/upload",
   form
 );
   setData(res.data);
@@ -217,27 +209,14 @@ const exportPDF = () => {
 
 
 if (!loggedIn) {
-const handleLogin = async () => {
-  try {
-    const res = await axios.post("https://loglens-api-57cj.onrender.com/login", {
-      username,
-      password,
-    });
-
-    if (res.data.success) {
+  const handleLogin = () => {
+    if (username === "admin" && password === "1234") {
       setLoggedIn(true);
-      localStorage.setItem("loglens_login", "true");
       setError("");
+    } else {
+      setError("Invalid username or password");
     }
-  } catch (err) {
-    setError("Invalid username or password");
-  }
-};
-
-
-
-
-
+  };
 
   return (
     <div style={styles.loginPage}>
@@ -309,10 +288,7 @@ const handleLogin = async () => {
   </div>
 
   <button
-onClick={() => {
-  setLoggedIn(false);
-  localStorage.removeItem("loglens_login");
-}}
+    onClick={() => setLoggedIn(false)}
     style={styles.exportBtn}
   >
     Logout
@@ -420,7 +396,6 @@ onClick={() => {
 
 
       
-
 
 
 
@@ -737,7 +712,7 @@ controls: {
 
 grid: {
   display: "grid",
- gridTemplateColumns: "1fr 1fr",
+  gridTemplateColumns: "1fr 1fr",
   gap: 20,
   marginBottom: 20,
 },
