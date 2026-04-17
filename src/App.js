@@ -34,6 +34,8 @@ function App() {
   const [search, setSearch] = useState("");
   const [severity, setSeverity] = useState("all");
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+
 
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
