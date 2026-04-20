@@ -34,7 +34,6 @@ function App() {
   const [search, setSearch] = useState("");
   const [severity, setSeverity] = useState("all");
   const [loading, setLoading] = useState(false);
-  const [progress] = useState(0);
 
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
@@ -43,7 +42,7 @@ function App() {
   const [showPassword, setShowPassword] = useState(false);
 
   const [statusText, setStatusText] = useState("");
-
+const [progress, setProgress] = useState(0);
 
 useEffect(() => {
   const savedLogin = localStorage.getItem("loglens_login");
@@ -62,20 +61,49 @@ const handleUpload = async (e) => {
   form.append("file", file);
 
   setLoading(true);
-  setStatusText("Uploading...");
+  setStatusText("Queued...");
+  setProgress(0);
 
-const res = await axios.post(
-  "https://loglens-api-57cj.onrender.com/upload",
-  form
-);
+  const uploadRes = await axios.post(
+    "https://loglens-api-57cj.onrender.com/upload_async",
+    form
+  );
 
+  const id = uploadRes.data.job_id;
 
-  setData(res.data);
-  setLoading(false);
+  const interval = setInterval(async () => {
+    const statusRes = await axios.get(
+      `https://loglens-api-57cj.onrender.com/status/${id}`
+    );
 
+    const job = statusRes.data;
+
+    setStatusText(job.status);
+    setProgress(job.progress || 0);
+
+    if (job.status === "completed") {
+      clearInterval(interval);
+      setData(job.result);
+      setLoading(false);
+      setProgress(100);
+      setStatusText("Completed");
+    }
+
+    if (job.status === "failed") {
+      clearInterval(interval);
+      setLoading(false);
+      setStatusText("Failed");
+    }
+  }, 2000);
 };
 
 
+
+
+
+
+
+  
 
 
 
@@ -103,51 +131,62 @@ const filteredLogs = logs.filter((log) => {
 });
   
 
-  const countryMap = {};
-  const typeMap = {};
-  const timeMap = {};
-  const attackerMap = {};
+const countryMap = {};
+const typeMap = {};
+const timeMap = {};
+const attackerMap = {};
 
-  filteredLogs.forEach((l) => {
-    countryMap[l.country] = (countryMap[l.country] || 0) + 1;
-    typeMap[l.attack] = (typeMap[l.attack] || 0) + 1;
+filteredLogs.forEach((l) => {
+  countryMap[l.country] = (countryMap[l.country] || 0) + 1;
+  typeMap[l.attack] = (typeMap[l.attack] || 0) + 1;
 
-    const hour = l.timestamp.split(":")[1] + ":00";
-    timeMap[hour] = (timeMap[hour] || 0) + 1;
+  const hour = l.timestamp.split(":")[1] + ":00";
+  timeMap[hour] = (timeMap[hour] || 0) + 1;
 
-    if (l.attack !== "normal") {
-      attackerMap[l.ip] = (attackerMap[l.ip] || 0) + 1;
-    }
-  });
+  if (l.attack !== "normal") {
+    attackerMap[l.ip] = (attackerMap[l.ip] || 0) + 1;
+  }
+});
 
-  const countryData = Object.entries(countryMap).map(([country, count]) => ({
+const countryData = Object.entries(countryMap)
+  .map(([country, count]) => ({
     country,
     count,
-  }));
+  }))
+  .sort((a, b) => b.count - a.count)
+  .slice(0, 8);
 
-  const typeData = Object.entries(typeMap).map(([name, value]) => ({
+const typeData = Object.entries(typeMap)
+  .map(([name, value]) => ({
     name,
     value,
-  }));
+  }))
+  .filter((item) => item.name !== "normal")
+  .sort((a, b) => b.value - a.value);
 
-  const lineData = Object.entries(timeMap).map(([time, count]) => ({
+const lineData = Object.entries(timeMap)
+  .map(([time, count]) => ({
     time,
     count,
-  }));
+  }))
+  .sort((a, b) => a.time.localeCompare(b.time));
 
-  const attackerData = Object.entries(attackerMap).map(([ip, count]) => ({
+const attackerData = Object.entries(attackerMap)
+  .map(([ip, count]) => ({
     ip,
     count,
-  }));
+  }))
+  .sort((a, b) => b.count - a.count)
+  .slice(0, 5);
 
-  const pieColors = [
-    "#06B6D4",
-    "#8B5CF6",
-    "#F43F5E",
-    "#10B981",
-    "#F59E0B",
-    "#3B82F6",
-  ];
+const pieColors = [
+  "#06B6D4",
+  "#8B5CF6",
+  "#F43F5E",
+  "#10B981",
+  "#F59E0B",
+  "#3B82F6",
+];
 
 const exportCSV = () => {
   const headers = [
@@ -183,6 +222,10 @@ const exportCSV = () => {
   link.download = "loglens-report.csv";
   link.click();
 };
+
+
+
+
 
 const exportPDF = () => {
   const doc = new jsPDF();
