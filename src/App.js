@@ -13,7 +13,7 @@ import {
   PieChart,
   Pie,
   Cell,
-  AreaChart,
+  AreaChart, LineChart, Line,
   Area,
   Legend,
 } from "recharts";
@@ -507,7 +507,7 @@ onClick={() => {
       <div style={styles.grid}>
         <Card title="📈 Threat Timeline">
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={lineData}>
+            <LineChart data={data.timeline || []}>
               <defs>
                 <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.8} />
@@ -518,13 +518,12 @@ onClick={() => {
               <XAxis dataKey="time" stroke="#cbd5e1" />
               <YAxis stroke="#cbd5e1" />
               <Tooltip />
-              <Area
+              <Line type="monotone"
                 dataKey="count"
                 stroke="#06B6D4"
-                fill="url(#grad1)"
                 strokeWidth={3}
               />
-            </AreaChart>
+            </LineChart>
           </ResponsiveContainer>
         </Card>
 
