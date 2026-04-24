@@ -134,7 +134,6 @@ const filteredLogs = logs.filter((log) => {
     value,
   }));
 
-  const lineData = Object.entries(timeMap).map(([time, count]) => ({
     time,
     count,
   }));
