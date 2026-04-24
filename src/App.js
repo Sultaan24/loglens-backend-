@@ -13,7 +13,7 @@ import {
   PieChart,
   Pie,
   Cell,
-  AreaChart, LineChart, Line,
+  AreaChart,
   Area,
   Legend,
 } from "recharts";
@@ -126,21 +126,16 @@ const filteredLogs = logs.filter((log) => {
 
   const countryData = Object.entries(countryMap).map(([country, count]) => ({
     country,
-    count,
-  }));
 
 const lineData = data?.timeline || [];
 
   const typeData = Object.entries(typeMap).map(([name, value]) => ({
     name,
     value,
-  }));
 
 
   const attackerData = Object.entries(attackerMap).map(([ip, count]) => ({
     ip,
-    count,
-  }));
 
   const pieColors = [
     "#06B6D4",
@@ -507,7 +502,7 @@ onClick={() => {
       <div style={styles.grid}>
         <Card title="📈 Threat Timeline">
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={data.timeline || []}>
+            <AreaChart data={data.timeline || []}>
               <defs>
                 <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.8} />
@@ -518,12 +513,12 @@ onClick={() => {
               <XAxis dataKey="time" stroke="#cbd5e1" />
               <YAxis stroke="#cbd5e1" />
               <Tooltip />
-              <Line type="monotone"
+              <Area
                 dataKey="count"
                 stroke="#06B6D4"
                 strokeWidth={3}
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         </Card>
 
