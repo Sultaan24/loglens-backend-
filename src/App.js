@@ -129,6 +129,8 @@ const filteredLogs = logs.filter((log) => {
     count,
   }));
 
+const lineData = data?.timeline || [];
+
   const typeData = Object.entries(typeMap).map(([name, value]) => ({
     name,
     value,
