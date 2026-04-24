@@ -123,22 +123,22 @@ const filteredLogs = logs.filter((log) => {
       attackerMap[l.ip] = (attackerMap[l.ip] || 0) + 1;
     }
   });
-
   const countryData = Object.entries(countryMap).map(([country, count]) => ({
     country,
-
-const lineData = data?.timeline || [];
+    count,
+  }));
 
   const typeData = Object.entries(typeMap).map(([name, value]) => ({
     name,
     value,
-
+  }));
 
   const attackerData = Object.entries(attackerMap).map(([ip, count]) => ({
     ip,
+    count,
+  }));
 
   const pieColors = [
-    "#06B6D4",
     "#8B5CF6",
     "#F43F5E",
     "#10B981",
