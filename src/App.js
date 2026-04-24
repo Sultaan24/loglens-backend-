@@ -340,11 +340,11 @@ onClick={() => {
           onChange={(e) => setSeverity(e.target.value)}
           style={styles.input}
         >
-          <option value="all">All Severity</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
-          <option value="none">None</option>
+          <option style={{color:"#000",background:"#fff"}} value="all">All Severity</option>
+          <option style={{color:"#000",background:"#fff"}} value="high">High</option>
+          <option style={{color:"#000",background:"#fff"}} value="medium">Medium</option>
+          <option style={{color:"#000",background:"#fff"}} value="low">Low</option>
+          <option style={{color:"#000",background:"#fff"}} value="none">None</option>
         </select>
 
         <button onClick={loadDemo} style={styles.demoBtn}>
