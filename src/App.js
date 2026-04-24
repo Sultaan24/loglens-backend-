@@ -134,9 +134,6 @@ const filteredLogs = logs.filter((log) => {
     value,
   }));
 
-    time,
-    count,
-  }));
 
   const attackerData = Object.entries(attackerMap).map(([ip, count]) => ({
     ip,
